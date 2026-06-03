@@ -19,7 +19,7 @@
           if ($line !== null):
 
           // the $line is 1-indexed, we nab -1 where needed to account for this
-          $range = $frame->getFileLines($line - 20, 40);
+          $range = $frame->getFileLines($line - 125, 250);
 
           // getFileLines can return null if there is no source code
           if ($range):

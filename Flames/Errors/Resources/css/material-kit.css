@@ -66,8 +66,9 @@ a {
 
 .left-panel {
   width: 30%;
-  background: #303030;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #262626;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .details-container {
@@ -75,6 +76,17 @@ a {
   width: 70%;
   background: #262626;
   color: #cfd8dc;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.panel-card {
+  background: #303030;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.28),
+              0 3px 14px 2px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
 }
 
 /* ── Header / exception ── */
@@ -102,6 +114,61 @@ header.header-expand {
   font-weight: 500;
   letter-spacing: 0.6px;
   text-transform: uppercase;
+}
+
+.exception-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.exception-top-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.exception-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.exception-action {
+  cursor: pointer;
+  border: 1px solid rgba(255, 135, 0, 0.45);
+  background: rgba(255, 135, 0, 0.1);
+  color: #ffa040;
+  box-shadow: none;
+  border-radius: 4px;
+  outline: none !important;
+  line-height: 0;
+  text-decoration: none;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exception-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.exception-action-icon svg {
+  display: block;
+  fill: currentColor;
+}
+
+.exception-action:hover {
+  color: #fff;
+  background: #ff8700;
+  border-color: transparent;
+  box-shadow: 0 2px 6px rgba(255, 135, 0, 0.35);
 }
 
 .exc-title-primary,
@@ -147,98 +214,6 @@ header.header-expand {
 .prev-exc-title + ul li .prev-exc-code {
   display: inline-block;
   color: #ffa040;
-}
-
-/* ── Action buttons ── */
-
-.rightButton {
-  cursor: pointer;
-  border: 1px solid rgba(255, 135, 0, 0.45);
-  background: rgba(255, 135, 0, 0.1);
-  color: #ffa040;
-  box-shadow: none;
-  border-radius: 4px;
-  outline: none !important;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  margin-left: 6px;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.rightButton:hover {
-  color: #fff;
-  background: #ff8700;
-  border-color: transparent;
-  box-shadow: 0 2px 6px rgba(255, 135, 0, 0.35);
-}
-
-.search-for-help {
-  width: auto;
-  padding: 0;
-  margin: 14px 0 0;
-  list-style-type: none;
-  display: inline-flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.search-for-help li {
-  display: inline-block;
-}
-
-.search-for-help li a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.search-for-help li a:hover {
-  background: rgba(255, 135, 0, 0.12);
-  border-color: rgba(255, 135, 0, 0.45);
-}
-
-.search-for-help li a svg {
-  fill: #cfd8dc;
-}
-
-.search-for-help li a:hover svg {
-  fill: #ffa040;
-}
-
-.search-on-web {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: auto !important;
-  height: auto !important;
-  padding: 6px 12px !important;
-  border: 1px solid rgba(255, 135, 0, 0.45) !important;
-  background: rgba(255, 135, 0, 0.1) !important;
-  color: #ffa040 !important;
-  border-radius: 4px;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.search-on-web:hover {
-  color: #fff !important;
-  background: #ff8700 !important;
-  border-color: transparent !important;
-  box-shadow: 0 2px 6px rgba(255, 135, 0, 0.35);
 }
 
 #plain-exception {
@@ -414,7 +389,7 @@ header.header-expand {
 /* ── Code panel ── */
 
 .details {
-  padding: 8px;
+  padding: 0 16px 16px;
 }
 
 .details-heading {
@@ -427,7 +402,7 @@ header.header-expand {
 
 .frame-code {
   padding: 0;
-  background: #262626;
+  background: transparent;
   display: none;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -460,9 +435,13 @@ header.header-expand {
   pointer-events: none;
 }
 
+.frame-code-container {
+  padding: 16px 16px 0;
+}
+
 .frame-code .frame-file {
   color: #78909c;
-  padding: 16px 20px 8px;
+  padding: 16px 0 8px;
   margin-left: 0;
   font-size: 12px;
 }
@@ -487,16 +466,30 @@ header.header-expand {
 
 .code-block {
   padding: 0;
-  margin: 0 16px 16px;
+  margin: 0 0 16px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.28),
-              0 3px 14px 2px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
   background: #212121;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+pre.code-block.line-numbers {
+  max-height: 480px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+}
+
+pre.code-block.line-numbers > code[class*="language-"] {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  display: block;
 }
 
 .frame-code-container.empty {
@@ -505,7 +498,7 @@ header.header-expand {
 }
 
 .frame-args {
-  margin: 0 16px 16px;
+  margin: 0 0 16px;
 }
 
 .linenums {
@@ -515,7 +508,7 @@ header.header-expand {
 
 .frame-comments {
   border-top: none;
-  margin: 0 16px 16px;
+  margin: 0 0 16px;
   font-size: 12px;
 }
 
@@ -548,40 +541,52 @@ header.header-expand {
 
 /* ── Environment tables ── */
 
-.data-table-container label {
+.data-table-container {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 4px;
+}
+
+.data-table-group {
+  margin-bottom: 20px;
+}
+
+.data-table-group:last-child {
+  margin-bottom: 0;
+}
+
+.data-table-group label {
   font-size: 12px;
   color: #ffa040;
   font-weight: 600;
-  margin: 20px 16px 8px;
+  margin: 16px 0 8px;
   display: block;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
-.data-table-container label.empty {
+.data-table-group label.empty {
   color: #78909c;
 }
 
-.data-table {
-  width: calc(100% - 32px);
-  margin: 0 16px 16px;
+table.data-table {
+  width: 100%;
+  margin: 0;
   border-collapse: collapse;
   border-spacing: 0;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.data-table thead {
+table.data-table thead {
   display: table-header-group;
 }
 
-.data-table thead tr {
+table.data-table thead tr {
   background: linear-gradient(60deg, #ff9800, #ff8700);
 }
 
-.data-table thead td {
+table.data-table thead td {
   color: #fff;
   font-weight: 600;
   font-size: 11px;
@@ -590,47 +595,47 @@ header.header-expand {
   padding: 10px 14px;
 }
 
-.data-table tbody {
+table.data-table tbody {
   font: 12px ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 }
 
-.data-table tr {
+table.data-table tr {
   padding: 0;
   transition: background 0.15s ease;
 }
 
-.data-table tbody tr:hover td {
+table.data-table tbody tr:hover td {
   background: rgba(255, 135, 0, 0.08);
 }
 
-.data-table td {
+table.data-table td {
   padding: 10px 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   vertical-align: top;
 }
 
-.data-table td:first-child {
+table.data-table td:first-child {
   width: 22%;
   min-width: 130px;
   overflow: hidden;
   font-weight: 600;
   color: #ffa040;
-  background: #303030;
+  background: #2a2a2a;
   padding-right: 12px;
 }
 
-.data-table td:last-child {
+table.data-table td:last-child {
   width: 78%;
   word-break: break-word;
   color: #b0bec5;
   background: #343434;
 }
 
-.data-table span.empty {
+.data-table-group span.empty {
   font-weight: 400;
   color: #78909c;
-  padding: 0 16px 16px;
   display: inline-block;
+  margin-bottom: 8px;
 }
 
 .details pre.sf-dump {
@@ -676,6 +681,7 @@ pre.sf-dump {
   margin: 0 !important;
   padding: 14px 0 14px 3.8em !important;
   background: #212121 !important;
+  overflow-x: hidden !important;
 }
 
 .--flames-error-handler :not(pre) > code[class*="language-"] {
@@ -686,18 +692,18 @@ pre.sf-dump {
 .--flames-error-handler .token.boolean,
 .--flames-error-handler .token.function,
 .--flames-error-handler .token.number {
-  color: #ffa040 !important;
+  color: #57aaf7 !important;
 }
 
 .--flames-error-handler .token.class-name,
 .--flames-error-handler .token.constant,
 .--flames-error-handler .token.property,
 .--flames-error-handler .token.symbol {
-  color: #ffb74d !important;
+  color: #eceff1 !important;
 }
 
 .--flames-error-handler .token.keyword {
-  color: #ff8700 !important;
+  color: #ffb366 !important;
 }
 
 .--flames-error-handler .line-numbers-rows {
@@ -839,11 +845,6 @@ kbd {
 /* ── Responsive ── */
 
 @media (min-width: 1000px) {
-  .details,
-  .frame-code {
-    padding: 12px 8px;
-  }
-
   .details-container {
     left: 32%;
     width: 68%;
@@ -866,9 +867,11 @@ kbd {
     max-height: none;
   }
 
+  .left-panel,
   .details-container {
     left: 0;
     width: 100%;
+    padding: 16px;
   }
 
   header {
@@ -877,26 +880,26 @@ kbd {
 }
 
 @media (max-width: 400px) {
-  .data-table,
-  .data-table tbody,
-  .data-table tbody tr,
-  .data-table tbody td {
+  table.data-table,
+  table.data-table tbody,
+  table.data-table tbody tr,
+  table.data-table tbody td {
     display: block;
     width: 100%;
   }
 
-  .data-table tbody tr:first-child {
+  table.data-table tbody tr:first-child {
     padding-top: 0;
   }
 
-  .data-table tbody td:first-child,
-  .data-table tbody td:last-child {
+  table.data-table tbody td:first-child,
+  table.data-table tbody td:last-child {
     padding-left: 14px;
     padding-right: 14px;
     width: 100%;
   }
 
-  .data-table tbody td:last-child {
+  table.data-table tbody td:last-child {
     padding-top: 4px;
     border-top: none;
   }

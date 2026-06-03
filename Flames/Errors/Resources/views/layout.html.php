@@ -14,7 +14,7 @@ use Flames\Connection;
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
         <title>Flames | Error Handler</title>
 
-        <link rel="icon" type="image/png" href="/.flames.png"/>
+        <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/flamesphp/cdn@latest/img/flames.png"/>
         <style><?php echo $stylesheet ?></style>
         <style><?php echo $prismCss ?></style>
         <style>
@@ -50,7 +50,7 @@ use Flames\Connection;
     <?php
         // if(\Flames\Connection\HttpClient::isHttpClient() === false && Connection\Async::isFlamesClient() === false) {  ?>
             <div class="--flames-fullscreen-loading">
-                <img src="/.flames.png">
+                <img src="https://cdn.jsdelivr.net/gh/flamesphp/cdn@latest/img/flames.png" alt="">
             </div>
     <?php
         // }
@@ -65,6 +65,12 @@ use Flames\Connection;
         <script><?php echo $zepto ?></script>
         <script><?php echo $clipboard ?></script>
         <script><?php echo $javascript ?></script>
+        <script type="application/json" id="flames-reload-request"><?php
+            echo json_encode(
+                $reload_request,
+                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+            );
+        ?></script>
         <script>
             var flamesLoading = document.querySelector('.--flames-fullscreen-loading')
             window.setTimeout(function() {

@@ -278,6 +278,7 @@ class PrettyPageHandler extends Handler
                 "Server/Request Data"   => $this->masked($_SERVER, '_SERVER'),
                 "PHP Environment Variables" => $this->masked($_ENV, '_ENV'),
             ],
+            "reload_request" => $this->getReloadRequest(),
         ];
 
         if (isset($customCssFile)) {
@@ -346,6 +347,28 @@ class PrettyPageHandler extends Handler
         }
 
         return (string) $code;
+    }
+
+    /**
+     * Request metadata used by the error page reload action.
+     *
+     * @return array{method: string, url: string, query: array, body: array}
+     */
+    protected function getReloadRequest(): array
+    {
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $path = parse_url($uri, PHP_URL_PATH);
+
+        if ($path === null || $path === '') {
+            $path = '/';
+        }
+
+        return [
+            'method' => strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET'),
+            'url' => $path,
+            'query' => $_GET,
+            'body' => $_POST,
+        ];
     }
 
     /**

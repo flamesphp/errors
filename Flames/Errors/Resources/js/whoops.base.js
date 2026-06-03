@@ -47,22 +47,32 @@ Zepto(function($) {
    */
 
   var highlightCurrentLine = function() {
-    // We show more code than needed, purely for proper syntax highlighting
-    // Let’s hide a big chunk of that code and then scroll the remaining block
-    $activeFrame.find('.code-block').first().css({
-      maxHeight: 345,
-      overflow: 'hidden',
-    });
+    var $codeBlock = $activeFrame.find('pre.code-block.line-numbers').first();
 
-    var line = $activeFrame.find('.code-block .line-highlight').first()[0];
-    if (!line) {
+    if (!$codeBlock.length) {
       return;
     }
 
-    line.scrollIntoView();
-    line.parentElement.scrollTop -= 180;
+    var scrollToHighlightedLine = function() {
+      var codeBlock = $codeBlock[0];
+      var highlight = codeBlock.querySelector('.line-highlight');
 
-    $container.scrollTop(0);
+      if (!highlight) {
+        return;
+      }
+
+      var lineTop = highlight.offsetTop;
+      var lineHeight = highlight.offsetHeight || parseFloat(window.getComputedStyle(codeBlock).lineHeight) || 19;
+      var targetScroll = lineTop - (codeBlock.clientHeight / 2) + (lineHeight / 2);
+
+      codeBlock.scrollTop = Math.max(0, targetScroll);
+      $container.scrollTop(0);
+    };
+
+    // wait for Prism line-highlight layout before scrolling the code block
+    requestAnimationFrame(function() {
+      requestAnimationFrame(scrollToHighlightedLine);
+    });
   }
 
   var FRAME_FADE_MS = 200;
@@ -156,10 +166,135 @@ Zepto(function($) {
 
   var btn = document.querySelector('.clipboard');
 
-  btn.addEventListener('mouseleave', function(e) {
-    e.currentTarget.classList.remove('tooltipped', 'tooltipped-s');
-    e.currentTarget.removeAttribute('aria-label');
-  });
+  if (btn) {
+    btn.addEventListener('mouseleave', function(e) {
+      e.currentTarget.classList.remove('tooltipped', 'tooltipped-s');
+      e.currentTarget.removeAttribute('aria-label');
+    });
+  }
+
+  var appendRequestFields = function(form, data, prefix) {
+    if (data == null) {
+      return;
+    }
+
+    if (Object.prototype.toString.call(data) === '[object Array]') {
+      for (var i = 0; i < data.length; i++) {
+        var indexedName = prefix ? prefix + '[' + i + ']' : String(i);
+        appendRequestFieldValue(form, data[i], indexedName);
+      }
+      return;
+    }
+
+    if (typeof data === 'object') {
+      for (var key in data) {
+        if (!Object.prototype.hasOwnProperty.call(data, key)) {
+          continue;
+        }
+        var fieldName = prefix ? prefix + '[' + key + ']' : key;
+        appendRequestFieldValue(form, data[key], fieldName);
+      }
+    }
+  };
+
+  var appendRequestFieldValue = function(form, value, name) {
+    if (value !== null && typeof value === 'object') {
+      appendRequestFields(form, value, name);
+      return;
+    }
+
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value == null ? '' : String(value);
+    form.appendChild(input);
+  };
+
+  var buildRequestQuery = function(params, prefix, pairs) {
+    pairs = pairs || [];
+
+    if (params == null) {
+      return pairs.join('&');
+    }
+
+    if (Object.prototype.toString.call(params) === '[object Array]') {
+      for (var i = 0; i < params.length; i++) {
+        var indexedName = prefix ? prefix + '[' + i + ']' : String(i);
+        appendRequestQueryValue(params[i], indexedName, pairs);
+      }
+      return pairs.join('&');
+    }
+
+    if (typeof params === 'object') {
+      for (var key in params) {
+        if (!Object.prototype.hasOwnProperty.call(params, key)) {
+          continue;
+        }
+        var fieldName = prefix ? prefix + '[' + key + ']' : key;
+        appendRequestQueryValue(params[key], fieldName, pairs);
+      }
+    }
+
+    return pairs.join('&');
+  };
+
+  var appendRequestQueryValue = function(value, name, pairs) {
+    if (value !== null && typeof value === 'object') {
+      buildRequestQuery(value, name, pairs);
+      return;
+    }
+
+    pairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(value == null ? '' : String(value)));
+  };
+
+  var reloadPage = function() {
+    var requestNode = document.getElementById('flames-reload-request');
+    var request = null;
+
+    if (requestNode) {
+      try {
+        request = JSON.parse(requestNode.textContent || '{}');
+      } catch (error) {
+        request = null;
+      }
+    }
+
+    if (!request) {
+      window.location.reload();
+      return;
+    }
+
+    var method = String(request.method || 'GET').toUpperCase();
+    var url = request.url || window.location.pathname;
+    var query = buildRequestQuery(request.query);
+
+    if (query) {
+      url += (url.indexOf('?') >= 0 ? '&' : '?') + query;
+    }
+
+    if (method === 'GET' || method === 'HEAD') {
+      window.location.href = url;
+      return;
+    }
+
+    if (method === 'POST') {
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.style.display = 'none';
+      appendRequestFields(form, request.body || {}, '');
+      document.body.appendChild(form);
+      form.submit();
+      return;
+    }
+
+    window.location.reload();
+  };
+
+  var reloadButton = document.getElementById('reload-button');
+  if (reloadButton) {
+    reloadButton.addEventListener('click', reloadPage);
+  }
 
   function fallbackMessage(action) {
     var actionMsg = '';
