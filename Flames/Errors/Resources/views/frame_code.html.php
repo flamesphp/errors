@@ -9,10 +9,7 @@
           <?php $filePath = $frame->getFile(); ?>
           <?php if ($filePath && $editorHref = $handler->getEditorHref($filePath, (int) $line)): ?>
             <?php $openLabel = $tpl->frameFileLabel($filePath, $line !== null ? (int) $line : null); ?>
-            <a href="<?php echo $editorHref ?>" class="editor-link"<?php echo ($handler->getEditorAjax($filePath, (int) $line) ? ' data-ajax' : '') ?>>
-              Open:
-              <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($openLabel)) ?></strong>
-            </a>
+            <a href="<?php echo $editorHref ?>" class="editor-link"<?php echo ($handler->getEditorAjax($filePath, (int) $line) ? ' data-ajax' : '') ?>><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($openLabel)) ?></a>
           <?php else: ?>
             <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($filePath ? $tpl->frameFileLabel($filePath, $line !== null ? (int) $line : null) : '<#unknown>')) ?></strong>
           <?php endif ?>
@@ -50,10 +47,10 @@
         <?php endif ?>
 
         <?php
-          // Append comments for this frame
           $comments = $frame->getComments();
         ?>
-        <div class="frame-comments <?php echo empty($comments) ? 'empty' : '' ?>">
+        <?php if (!empty($comments)): ?>
+        <div class="frame-comments">
           <?php foreach ($comments as $commentNo => $comment): ?>
             <?php extract($comment) ?>
             <div class="frame-comment" id="comment-<?php echo $i . '-' . $commentNo ?>">
@@ -62,6 +59,7 @@
             </div>
           <?php endforeach ?>
         </div>
+        <?php endif ?>
       </div>
   <?php endforeach ?>
 </div>
