@@ -111,18 +111,110 @@ class TemplateHelper
     }
 
     /**
-     * Replace the part of the path that all files have in common.
+     * Shortens an absolute path relative to ROOT_PATH when available.
      *
      * @param  string $path
      * @return string
      */
     public function shorten($path)
     {
-        if ($this->applicationRootPath != "/") {
-            $path = str_replace($this->applicationRootPath, '&hellip;', $path);
+        $path = str_replace('\\', '/', $path);
+
+        if (defined('ROOT_PATH')) {
+            $root = rtrim(str_replace('\\', '/', ROOT_PATH), '/') . '/';
+            $candidates = [$path];
+
+            $resolved = realpath($path);
+            if ($resolved !== false) {
+                $candidates[] = str_replace('\\', '/', $resolved);
+            }
+
+            if ($path !== '' && $path[0] !== '/' && !preg_match('#^[A-Za-z]:/#', $path)) {
+                $joined = realpath($root . $path);
+                if ($joined !== false) {
+                    $candidates[] = str_replace('\\', '/', $joined);
+                }
+            }
+
+            foreach ($candidates as $candidate) {
+                if (str_starts_with($candidate, $root)) {
+                    return substr($candidate, strlen($root));
+                }
+            }
+        }
+
+        $root = rtrim(str_replace('\\', '/', $this->applicationRootPath), '/') . '/';
+        if ($root !== '/' && str_starts_with($path, $root)) {
+            return substr($path, strlen($root));
         }
 
         return $path;
+    }
+
+    /**
+     * Display label overrides for stack frames, matching Dumpper trace rules.
+     * Returns null when the file should keep its normal shortened path label.
+     */
+    public function traceLinkText(string $file, ?int $line): ?string
+    {
+        if ($this->isBootTraceFile($file)) {
+            return '[Flames] boot' . ($line ? ':' . $line : '');
+        }
+
+        $path   = $this->shorten(str_replace('\\', '/', $file));
+        $prefix = 'vendor/flamesphp/';
+
+        if (str_starts_with($path, $prefix)) {
+            $relative = substr($path, strlen($prefix));
+
+            return '[Flames] ' . $relative . ($line ? ':' . $line : '');
+        }
+
+        return null;
+    }
+
+    /**
+     * Human-readable file label for stack frames.
+     */
+    public function frameFileLabel(string $file, ?int $line): string
+    {
+        $custom = $this->traceLinkText($file, $line);
+        if ($custom !== null) {
+            return $custom;
+        }
+
+        return $this->shorten(str_replace('\\', '/', $file));
+    }
+
+    /**
+     * Line number suffix for stack frames when not already embedded in the label.
+     */
+    public function frameFileLine(string $file, ?int $line): ?int
+    {
+        if ($line === null || $this->traceLinkText($file, $line) !== null) {
+            return null;
+        }
+
+        return $line;
+    }
+
+    /**
+     * Path used in IDE/editor links, relative to the project root when possible.
+     */
+    public function editorFilePath(string $file): string
+    {
+        $absoluteFile = str_replace('\\', '/', $file);
+        $resolved     = realpath($file);
+        if ($resolved !== false) {
+            $absoluteFile = str_replace('\\', '/', $resolved);
+        }
+
+        return $this->shorten($absoluteFile);
+    }
+
+    private function isBootTraceFile(string $file): bool
+    {
+        return $this->shorten(str_replace('\\', '/', $file)) === 'public/index.php';
     }
 
     private function getDumper()

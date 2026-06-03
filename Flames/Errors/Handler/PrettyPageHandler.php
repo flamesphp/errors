@@ -205,7 +205,7 @@ class PrettyPageHandler extends Handler
         }
 
         $templateFile = $this->getResource("views/layout.html.php");
-        $cssFile      = $this->getResource("css/whoops.base.css");
+        $cssFile      = $this->getResource("css/material-kit.css");
         $zeptoFile    = $this->getResource("js/zepto.min.js");
         $prismJs = $this->getResource("js/prism.js");
         $prismCss = $this->getResource("css/prism.css");
@@ -533,8 +533,12 @@ class PrettyPageHandler extends Handler
         $localPath  = FlamesEnv::get('ERROR_HANDLER_LOCAL_PATH')  ?? '';
         $remotePath = FlamesEnv::get('ERROR_HANDLER_REMOTE_PATH') ?? '';
 
-        $realPath = \Flames\Collection\Strings::sub($filePath, \Flames\Collection\Strings::length($remotePath));
-        $realPath = ($localPath . $realPath);
+        if ($localPath !== '' && $remotePath !== '') {
+            $realPath = \Flames\Collection\Strings::sub($filePath, \Flames\Collection\Strings::length($remotePath));
+            $realPath = ($localPath . $realPath);
+        } else {
+            $realPath = $this->templateHelper->editorFilePath($filePath);
+        }
 
         if (\Flames\Collection\Strings::contains($realPath, '\\') === true) {
             $realPath = str_replace('/', '\\', $realPath);

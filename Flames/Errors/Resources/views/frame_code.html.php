@@ -8,12 +8,13 @@
         <div class="frame-file">
           <?php $filePath = $frame->getFile(); ?>
           <?php if ($filePath && $editorHref = $handler->getEditorHref($filePath, (int) $line)): ?>
+            <?php $openLabel = $tpl->frameFileLabel($filePath, $line !== null ? (int) $line : null); ?>
             <a href="<?php echo $editorHref ?>" class="editor-link"<?php echo ($handler->getEditorAjax($filePath, (int) $line) ? ' data-ajax' : '') ?>>
               Open:
-              <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($filePath ?: '<#unknown>')) ?></strong>
+              <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($openLabel)) ?></strong>
             </a>
           <?php else: ?>
-            <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($filePath ?: '<#unknown>')) ?></strong>
+            <strong><?php echo $tpl->breakOnDelimiter('/', $tpl->escape($filePath ? $tpl->frameFileLabel($filePath, $line !== null ? (int) $line : null) : '<#unknown>')) ?></strong>
           <?php endif ?>
         </div>
         <?php

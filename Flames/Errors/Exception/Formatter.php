@@ -7,6 +7,7 @@
 namespace Flames\Errors\Exception;
 
 use Flames\Errors\Inspector\InspectorInterface;
+use Flames\Errors\Util\TemplateHelper;
 
 /**
  * @internal
@@ -64,15 +65,22 @@ class Formatter
         $plain .= '"'."\n\n";
 
         $plain .= "Stacktrace:\n";
+        $pathHelper = new TemplateHelper();
         foreach ($frames as $i => $frame) {
             $plain .= "#". (count($frames) - $i - 1). " ";
             $plain .= $frame->getClass() ?: '';
             $plain .= $frame->getClass() && $frame->getFunction() ? ":" : "";
             $plain .= $frame->getFunction() ?: '';
             $plain .= ' in ';
-            $plain .= ($frame->getFile() ?: '<#unknown>');
-            $plain .= ':';
-            $plain .= (int) $frame->getLine(). "\n";
+            if ($frame->getFile()) {
+                $plain .= $pathHelper->frameFileLabel($frame->getFile(), (int) $frame->getLine());
+                if ($pathHelper->frameFileLine($frame->getFile(), (int) $frame->getLine()) !== null) {
+                    $plain .= ':' . (int) $frame->getLine();
+                }
+            } else {
+                $plain .= '<#unknown>';
+            }
+            $plain .= "\n";
         }
 
         return $plain;

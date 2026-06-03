@@ -9,6 +9,7 @@
 namespace Flames\Errors\Handler;
 
 use Flames\Errors\Exception\Frame;
+use Flames\Errors\Util\TemplateHelper;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
@@ -285,13 +286,21 @@ class PlainTextHandler extends Handler
         $response = "\n" . $this->ansi('Stack trace:', '33');
 
         $line = 1;
+        $pathHelper = new TemplateHelper();
         foreach ($frames as $frame) {
             /** @var Frame $frame */
             $class = $frame->getClass();
+            $fileLabel = $frame->getFile()
+                ? $pathHelper->frameFileLabel($frame->getFile(), (int) $frame->getLine())
+                : '<#unknown>';
+            $lineSuffix = $frame->getFile()
+                ? $pathHelper->frameFileLine($frame->getFile(), (int) $frame->getLine())
+                : null;
+            $location = $lineSuffix !== null ? ($fileLabel . ':' . $lineSuffix) : $fileLabel;
 
-            $template = "\n  %s. %s->%s() %s:%s%s";
+            $template = "\n  %s. %s->%s() %s%s";
             if (! $class) {
-                $template = "\n  %s. %s%s() %s:%s%s";
+                $template = "\n  %s. %s%s() %s%s";
             }
 
             $response .= sprintf(
@@ -299,8 +308,7 @@ class PlainTextHandler extends Handler
                 $this->ansi($line, '90'),
                 $this->ansi($class, '36'),
                 $this->ansi($frame->getFunction(), '37'),
-                $this->ansi($frame->getFile(), '90'),
-                $this->ansi($frame->getLine(), '33'),
+                $this->ansi($location, '90'),
                 $this->getFrameArgsOutput($frame, $line)
             );
 
@@ -317,14 +325,17 @@ class PlainTextHandler extends Handler
      */
     private function getExceptionOutput($exception)
     {
+        $pathHelper = new TemplateHelper();
+        $fileLabel = $pathHelper->frameFileLabel($exception->getFile(), (int) $exception->getLine());
+        $lineSuffix = $pathHelper->frameFileLine($exception->getFile(), (int) $exception->getLine());
+        $location = $lineSuffix !== null ? ($fileLabel . ':' . $lineSuffix) : $fileLabel;
+
         return sprintf(
-            "%s: %s\n  %s %s %s %s",
+            "%s: %s\n  %s %s",
             $this->ansi(get_class($exception), '31;1'),
             $this->ansi($exception->getMessage(), '97;1'),
             $this->ansi('in', '90'),
-            $this->ansi($exception->getFile(), '90'),
-            $this->ansi('on line', '90'),
-            $this->ansi($exception->getLine(), '33')
+            $this->ansi($location, '90')
         );
     }
 

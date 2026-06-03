@@ -30,7 +30,7 @@ use Flames\Connection;
                 opacity: 1;
                 pointer-events: none;
                 z-index: 999997;
-                transition: opacity 0.5s;
+                transition: opacity 0.5s ease;
             }
 
             .--flames-fullscreen-loading img {
@@ -42,6 +42,7 @@ use Flames\Connection;
                 top: calc(50vh - 50px);
                 left: calc(50vw - 50px);
                 opacity: 0.75;
+                filter: drop-shadow(0 4px 16px rgba(255, 135, 0, 0.25));
             }
         </style>
     </head>
