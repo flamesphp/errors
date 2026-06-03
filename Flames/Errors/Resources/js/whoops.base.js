@@ -24,9 +24,21 @@ Zepto(function($) {
    * scroll to the line when prettyprint is done
    * highlight the current line
    */
-  var renderCurrentCodeblock = function(id) {
-    Prism.highlightAllUnder(document.querySelector('.frame-code-container .frame-code.active'));
+  var prepareCodeFrame = function($frame) {
+    $activeFrame = $frame;
+
+    if (!$frame.find('code .token').length) {
+      Prism.highlightAllUnder($frame[0]);
+    }
+
     highlightCurrentLine();
+  };
+
+  var renderCurrentCodeblock = function() {
+    var $frame = $('.frame-code-container .frame-code.active');
+    if ($frame.length) {
+      prepareCodeFrame($frame);
+    }
   }
 
   /*
@@ -43,11 +55,75 @@ Zepto(function($) {
     });
 
     var line = $activeFrame.find('.code-block .line-highlight').first()[0];
+    if (!line) {
+      return;
+    }
+
     line.scrollIntoView();
     line.parentElement.scrollTop -= 180;
 
     $container.scrollTop(0);
   }
+
+  var FRAME_FADE_MS = 200;
+  var isFrameSwitching = false;
+
+  var bindTransitionEnd = function($node, callback) {
+    var done = false;
+    var finish = function() {
+      if (done) {
+        return;
+      }
+      done = true;
+      callback();
+    };
+
+    $node.one('transitionend webkitTransitionEnd oTransitionEnd', finish);
+    window.setTimeout(finish, FRAME_FADE_MS + 50);
+  };
+
+  var showCodeFrame = function($incoming) {
+    isFrameSwitching = true;
+
+    $incoming.show().addClass('active is-preparing');
+    prepareCodeFrame($incoming);
+
+    $incoming.removeClass('is-preparing').addClass('is-fading-in');
+    void $incoming[0].offsetWidth;
+    $incoming.addClass('is-fading-in-visible');
+
+    bindTransitionEnd($incoming, function() {
+      $incoming.removeClass('is-fading-in is-fading-in-visible');
+      isFrameSwitching = false;
+    });
+  };
+
+  var switchCodeFrame = function($lineItem, id) {
+    var $incoming = $('#frame-code-' + id);
+
+    if (!$incoming.length || $lineItem.hasClass('active') || isFrameSwitching) {
+      return;
+    }
+
+    var $outgoing = $activeFrame;
+
+    $activeLine.removeClass('active');
+    $lineItem.addClass('active');
+    $activeLine = $lineItem;
+
+    if (!$outgoing.length || $outgoing[0] === $incoming[0]) {
+      showCodeFrame($incoming);
+      return;
+    }
+
+    isFrameSwitching = true;
+    $outgoing.addClass('is-fading-out');
+
+    bindTransitionEnd($outgoing, function() {
+      $outgoing.removeClass('active is-fading-out').hide();
+      showCodeFrame($incoming);
+    });
+  };
 
   /*
    * click handler for loading codeblocks
@@ -57,22 +133,8 @@ Zepto(function($) {
 
     var $this  = $(this);
     var id     = /frame\-line\-([\d]*)/.exec($this.attr('id'))[1];
-    var $codeFrame = $('#frame-code-' + id);
 
-    if ($codeFrame) {
-
-      $activeLine.removeClass('active');
-      $activeFrame.removeClass('active');
-
-      $this.addClass('active');
-      $codeFrame.addClass('active');
-
-      $activeLine  = $this;
-      $activeFrame = $codeFrame;
-
-      renderCurrentCodeblock(id);
-
-    }
+    switchCodeFrame($this, id);
 
   });
 

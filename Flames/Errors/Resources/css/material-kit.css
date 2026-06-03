@@ -429,10 +429,35 @@ header.header-expand {
   padding: 0;
   background: #262626;
   display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .frame-code.active {
   display: block;
+  opacity: 1;
+}
+
+.frame-code.active.is-fading-out,
+.frame-code.is-fading-out {
+  display: block;
+  opacity: 0;
+}
+
+.frame-code.is-fading-in {
+  display: block;
+  opacity: 0;
+}
+
+.frame-code.is-fading-in.is-fading-in-visible {
+  opacity: 1;
+}
+
+.frame-code.is-preparing {
+  display: block;
+  opacity: 0;
+  transition: none;
+  pointer-events: none;
 }
 
 .frame-code .frame-file {
