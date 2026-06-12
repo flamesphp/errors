@@ -53,6 +53,8 @@ Zepto(function($) {
       return;
     }
 
+    applyFeatureFlagDimming($codeBlock[0]);
+
     var scrollToHighlightedLine = function() {
       var codeBlock = $codeBlock[0];
       var highlight = codeBlock.querySelector('.line-highlight');
@@ -74,6 +76,129 @@ Zepto(function($) {
       requestAnimationFrame(scrollToHighlightedLine);
     });
   }
+
+  var applyFeatureFlagDimming = function(pre) {
+    if (!pre) {
+      return;
+    }
+
+    var code = pre.querySelector('code');
+    if (code) {
+      unwrapInactiveCode(code);
+    }
+
+    var rows = pre.querySelector('.line-numbers-rows');
+    if (rows) {
+      rows.querySelectorAll('.ff-flag-inactive-gutter').forEach(function(row) {
+        row.classList.remove('ff-flag-inactive-gutter');
+      });
+    }
+
+    var raw = pre.getAttribute('data-inactive-lines');
+    if (!raw) {
+      return;
+    }
+
+    var inactive = raw.split(',').map(function(value) {
+      return parseInt(value, 10);
+    }).filter(function(value) {
+      return !isNaN(value) && value > 0;
+    });
+
+    if (!inactive.length) {
+      return;
+    }
+
+    var inactiveSet = {};
+    inactive.forEach(function(lineNumber) {
+      inactiveSet[lineNumber] = true;
+    });
+
+    var start = parseInt(pre.getAttribute('data-start') || '1', 10);
+
+    if (rows) {
+      inactive.forEach(function(lineNumber) {
+        var rowIndex = lineNumber - start;
+        var rowSpan = rows.children[rowIndex];
+
+        if (rowSpan) {
+          rowSpan.classList.add('ff-flag-inactive-gutter');
+        }
+      });
+    }
+
+    if (code) {
+      applyInactiveCodeOpacity(code, inactiveSet, start);
+    }
+  };
+
+  var unwrapInactiveCode = function(code) {
+    code.querySelectorAll('span.ff-flag-inactive-code').forEach(function(span) {
+      var parent = span.parentNode;
+      if (!parent) {
+        return;
+      }
+
+      while (span.firstChild) {
+        parent.insertBefore(span.firstChild, span);
+      }
+
+      parent.removeChild(span);
+    });
+  };
+
+  var applyInactiveCodeOpacity = function(code, inactiveSet, startLine) {
+    var line = startLine;
+
+    var visit = function(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        var text = node.textContent;
+        if (text.indexOf('\n') === -1) {
+          if (inactiveSet[line]) {
+            var wrap = document.createElement('span');
+            wrap.className = 'ff-flag-inactive-code';
+            node.parentNode.insertBefore(wrap, node);
+            wrap.appendChild(node);
+          }
+          return;
+        }
+
+        var parent = node.parentNode;
+        var parts = text.split('\n');
+        var frag = document.createDocumentFragment();
+
+        for (var i = 0; i < parts.length; i++) {
+          if (i > 0) {
+            frag.appendChild(document.createTextNode('\n'));
+            line++;
+          }
+
+          if (parts[i].length === 0) {
+            continue;
+          }
+
+          var textNode = document.createTextNode(parts[i]);
+          if (inactiveSet[line]) {
+            var inactiveWrap = document.createElement('span');
+            inactiveWrap.className = 'ff-flag-inactive-code';
+            inactiveWrap.appendChild(textNode);
+            frag.appendChild(inactiveWrap);
+          } else {
+            frag.appendChild(textNode);
+          }
+        }
+
+        parent.replaceChild(frag, node);
+        return;
+      }
+
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.prototype.slice.call(node.childNodes).forEach(visit);
+      }
+    };
+
+    Array.prototype.slice.call(code.childNodes).forEach(visit);
+  };
 
   var FRAME_FADE_MS = 200;
   var isFrameSwitching = false;

@@ -37,6 +37,9 @@ class Frame implements Serializable
      */
     protected $application;
 
+    /** @var list<int>|null */
+    private ?array $inactiveFeatureFlagLines = null;
+
     public function __construct(array $frame)
     {
         $this->frame = $frame;
@@ -135,6 +138,33 @@ class Frame implements Serializable
         }
 
         return $this->fileContentsCache;
+    }
+
+    /**
+     * 1-based line numbers inside inactive #> feature-flag branches.
+     *
+     * @return list<int>
+     */
+    public function getInactiveFeatureFlagLines(): array
+    {
+        if ($this->inactiveFeatureFlagLines !== null) {
+            return $this->inactiveFeatureFlagLines;
+        }
+
+        $this->inactiveFeatureFlagLines = [];
+
+        if (!class_exists(\Flames\Subset\Transformer\FeatureFlag::class)) {
+            return $this->inactiveFeatureFlagLines;
+        }
+
+        $contents = $this->getFileContents();
+        if ($contents === null || $contents === '') {
+            return $this->inactiveFeatureFlagLines;
+        }
+
+        $this->inactiveFeatureFlagLines = \Flames\Subset\Transformer\FeatureFlag::getInactiveLineNumbers($contents);
+
+        return $this->inactiveFeatureFlagLines;
     }
 
     /**

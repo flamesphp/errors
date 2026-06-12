@@ -714,9 +714,22 @@ pre.sf-dump {
   color: #78909c !important;
 }
 
+.--flames-error-handler pre.code-block.line-numbers {
+  position: relative;
+}
+
+.--flames-error-handler .line-numbers-rows > span.ff-flag-inactive-gutter:before {
+  opacity: 0.2;
+}
+
+.--flames-error-handler .ff-flag-inactive-code {
+  opacity: 0.2;
+}
+
 .--flames-error-handler .line-highlight {
   background: rgba(255, 135, 0, 0.18) !important;
   border-left: 3px solid #ff8700;
+  z-index: 3;
 }
 
 .--flames-error-handler .line-highlight:before,

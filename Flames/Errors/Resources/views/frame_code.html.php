@@ -26,11 +26,19 @@
             $range = array_map(function ($line) { return empty($line) ? ' ' : $line;}, $range);
             $start = key($range) + 1;
             $code  = join("\n", $range);
+            $inactiveFeatureFlagLines = $frame->getInactiveFeatureFlagLines();
+            $visibleInactiveLines = array_values(array_filter(
+                $inactiveFeatureFlagLines,
+                static fn(int $lineNumber): bool => $lineNumber >= $start && $lineNumber < $start + count($range)
+            ));
         ?>
             <pre class="code-block line-numbers"
               data-line="<?php echo $line ?>"
               data-line-offset="<?php echo $start ?>"
               data-start="<?php echo $start ?>"
+              <?php if ($visibleInactiveLines !== []): ?>
+              data-inactive-lines="<?php echo implode(',', $visibleInactiveLines) ?>"
+              <?php endif; ?>
             ><code class="language-php"><?php echo $tpl->escape($code) ?></code></pre>
 
           <?php endif ?>
