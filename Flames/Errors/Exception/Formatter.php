@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -7,6 +9,7 @@
 namespace Flames\Errors\Exception;
 
 use Flames\Errors\Inspector\InspectorInterface;
+use Flames\Errors\Util\SourcePath;
 use Flames\Errors\Util\TemplateHelper;
 
 /**
@@ -29,7 +32,7 @@ class Formatter
             'type'    => get_class($exception),
             'message' => $exception->getMessage(),
             'code'    => $exception->getCode(),
-            'file'    => $exception->getFile(),
+            'file'    => SourcePath::resolve($exception->getFile()),
             'line'    => $exception->getLine(),
         ];
 

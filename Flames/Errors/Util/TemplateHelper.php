@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -7,6 +9,7 @@
 namespace Flames\Errors\Util;
 
 use Flames\Errors\Exception\Frame;
+use Flames\Errors\Util\SourcePath;
 use Symfony\Component\VarDumper\Caster\Caster;
 use Symfony\Component\VarDumper\Cloner\AbstractCloner;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
@@ -178,6 +181,8 @@ class TemplateHelper
      */
     public function frameFileLabel(string $file, ?int $line): string
     {
+        $file = SourcePath::resolve($file);
+
         $custom = $this->traceLinkText($file, $line);
         if ($custom !== null) {
             return $custom;
@@ -203,7 +208,7 @@ class TemplateHelper
      */
     public function editorFilePath(string $file): string
     {
-        $absoluteFile = str_replace('\\', '/', $file);
+        $absoluteFile = str_replace('\\', '/', SourcePath::resolve($file));
         $resolved     = realpath($file);
         if ($resolved !== false) {
             $absoluteFile = str_replace('\\', '/', $resolved);

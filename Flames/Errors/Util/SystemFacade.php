@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -127,14 +129,21 @@ class SystemFacade
      */
     public function setHttpResponseCode($httpCode)
     {
-        if (!headers_sent()) {
-            // Ensure that no 'location' header is present as otherwise this
-            // will override the HTTP code being set here, and mask the
-            // expected error page.
-            header_remove('location');
+        if (headers_sent()) {
+            return false;
         }
 
-        return http_response_code($httpCode);
+        // Ensure that no 'location' header is present as otherwise this
+        // will override the HTTP code being set here, and mask the
+        // expected error page.
+        header_remove('location');
+
+        // PHP 8.5 warns when http_response_code() is called after
+        // header('HTTP/...'). That status line is not visible in
+        // headers_list(), so suppress the harmless no-effect warning.
+        $result = @http_response_code($httpCode);
+
+        return $result !== false ? $result : $httpCode;
     }
 
     /**

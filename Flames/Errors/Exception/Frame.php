@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -6,6 +8,7 @@
 
 namespace Flames\Errors\Exception;
 
+use Flames\Errors\Util\SourcePath;
 use InvalidArgumentException;
 use Serializable;
 
@@ -58,6 +61,11 @@ class Frame implements Serializable
         if (preg_match('/^(.*)\((\d+)\) : (?:eval\(\)\'d|assert) code$/', $file, $matches)) {
             $file = $this->frame['file'] = $matches[1];
             $this->frame['line'] = (int) $matches[2];
+        }
+
+        if (is_string($file)) {
+            $file = SourcePath::resolve($file);
+            $this->frame['file'] = $file;
         }
 
         if ($shortened && is_string($file)) {

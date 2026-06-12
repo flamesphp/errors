@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -9,6 +11,8 @@ namespace Flames\Errors\Exception;
 use Flames\Errors\Inspector\InspectorFactory;
 use Flames\Errors\Inspector\InspectorInterface;
 use Flames\Errors\Util\Misc;
+use Flames\Errors\Util\PrototypeTraceFilter;
+use Flames\Errors\Util\SourcePath;
 
 /**
  * @internal
@@ -189,6 +193,12 @@ class Inspector implements InspectorInterface
         if ($this->frames === null) {
             $frames = $this->getTrace($this->exception);
 
+            foreach ($frames as $k => $frame) {
+                if (!empty($frame['file'])) {
+                    $frames[$k]['file'] = SourcePath::resolve($frame['file']);
+                }
+            }
+
             // Fill empty line/file info for call_user_func_array usages (PHP Bug #44428)
             foreach ($frames as $k => $frame) {
                 if (empty($frame['file'])) {
@@ -210,8 +220,9 @@ class Inspector implements InspectorInterface
 
             // Find latest non-error handling frame index ($i) used to remove error handling frames
             $i = 0;
+            $exceptionFile = SourcePath::resolve($this->exception->getFile());
             foreach ($frames as $k => $frame) {
-                if ($frame['file'] == $this->exception->getFile() && $frame['line'] == $this->exception->getLine()) {
+                if ($frame['file'] == $exceptionFile && $frame['line'] == $this->exception->getLine()) {
                     $i = $k;
                 }
             }
@@ -240,6 +251,8 @@ class Inspector implements InspectorInterface
                 $newFrames->prependFrames($outerFrames->topDiff($newFrames));
                 $this->frames = $newFrames;
             }
+
+            $this->frames = PrototypeTraceFilter::filterFrames($this->frames, $this->exception);
 
             // Apply frame filters callbacks on the frames stack
             if (!empty($frameFilters)) {
@@ -294,7 +307,7 @@ class Inspector implements InspectorInterface
     protected function getFrameFromException($exception)
     {
         return [
-            'file'  => $exception->getFile(),
+            'file'  => SourcePath::resolve($exception->getFile()),
             'line'  => $exception->getLine(),
             'class' => get_class($exception),
             'args'  => [
@@ -312,7 +325,7 @@ class Inspector implements InspectorInterface
     protected function getFrameFromError(ErrorException $exception)
     {
         return [
-            'file'  => $exception->getFile(),
+            'file'  => SourcePath::resolve($exception->getFile()),
             'line'  => $exception->getLine(),
             'class' => null,
             'args'  => [],

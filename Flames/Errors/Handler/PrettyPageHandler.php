@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ErrorHandler - php errors for cool kids
  * @author Filipe Dobreira <http://github.com/filp>
@@ -569,8 +571,8 @@ class PrettyPageHandler extends Handler
             $realPath = str_replace('\\', '/', $realPath);
         }
 
-        $editor['url'] = str_replace("%line", rawurlencode($line), $editor['url']);
-        $editor['url'] = str_replace("%file", rawurlencode($realPath), $editor['url']);
+        $editor['url'] = str_replace("%line", rawurlencode((string) $line), $editor['url']);
+        $editor['url'] = str_replace("%file", rawurlencode((string) $realPath), $editor['url']);
 
         return $editor['url'];
     }

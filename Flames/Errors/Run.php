@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 
 // Whoops fork: https://github.com/filp/whoops
 
@@ -424,14 +426,9 @@ final class Run implements RunInterface
                 while ($this->system->getOutputBufferLevel() > 0) {
                     $this->system->endOutputBuffering();
                 }
-
-                // Send any headers if needed:
-                if (Misc::canSendHeaders() && $handlerContentType) {
-                    header("Content-Type: {$handlerContentType}");
-                }
             }
 
-            $this->writeToOutputNow($output);
+            $this->writeToOutputNow($output, $willQuit ? $handlerContentType : null);
         }
 
         if ($willQuit) {
@@ -501,6 +498,7 @@ final class Run implements RunInterface
         // An exception thrown in a shutdown handler will not be propagated
         // to the exception handler. Pass that information along.
         $this->canThrowExceptions = false;
+        $this->sendHttpCode(false);
 
         $error = $this->system->getLastError();
         if ($error && Misc::isLevelFatal($error['type'])) {
@@ -582,12 +580,16 @@ final class Run implements RunInterface
      *
      * @return Run
      */
-    private function writeToOutputNow($output)
+    private function writeToOutputNow($output, $contentType = null)
     {
-        if ($this->sendHttpCode() && Misc::canSendHeaders()) {
-            $this->system->setHttpResponseCode(
-                $this->sendHttpCode()
-            );
+        if (Misc::canSendHeaders()) {
+            if ($this->sendHttpCode()) {
+                $this->system->setHttpResponseCode($this->sendHttpCode());
+            }
+
+            if ($contentType) {
+                header("Content-Type: {$contentType}");
+            }
         }
 
         echo $output;
